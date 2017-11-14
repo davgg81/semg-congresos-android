@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
+import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
@@ -21,6 +23,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        WebView myWebView = (WebView) findViewById(R.id.webView);
+        final WebView myWebView = (WebView) findViewById(R.id.webView);
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         CustomWebViewClient customClient = new CustomWebViewClient();
@@ -49,8 +55,15 @@ public class MainActivity extends AppCompatActivity {
                 DownloadManager.Request request = new DownloadManager.Request(
                         Uri.parse(url));
                 current_request = request;
-                current_fileName = URLUtil.guessFileName(url, null, null);
-
+                String fileName = URLUtil.guessFileName(url, null, null);
+                String cookies= CookieManager.getInstance().getCookie(url);
+                request.addRequestHeader("cookie",cookies);
+                request.addRequestHeader("User-Agent",userAgent);
+                if(fileName.endsWith("pdf") || fileName.endsWith("pptx")){
+                    current_fileName = fileName;
+                }else{
+                    current_fileName = "downloadedFile.pdf";
+                }
                 boolean permissionResult = haveStoragePermission();
                 if(permissionResult){
                     downloadFile(request, current_fileName);
@@ -58,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void downloadFile(DownloadManager.Request request, String fileName){
         request.allowScanningByMediaScanner();
