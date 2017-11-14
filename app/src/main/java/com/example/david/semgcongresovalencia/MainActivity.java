@@ -25,6 +25,7 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
 
     DownloadManager.Request current_request = null;
+    String current_fileName = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,19 +49,20 @@ public class MainActivity extends AppCompatActivity {
                 DownloadManager.Request request = new DownloadManager.Request(
                         Uri.parse(url));
                 current_request = request;
+                current_fileName = URLUtil.guessFileName(url, null, null);
 
                 boolean permissionResult = haveStoragePermission();
                 if(permissionResult){
-                    downloadFile(request);
+                    downloadFile(request, current_fileName);
                 }
             }
         });
     }
 
-    private void downloadFile(DownloadManager.Request request){
+    private void downloadFile(DownloadManager.Request request, String fileName){
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "Name of your downloadble file goes here, example: Mathematics II ");
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
         DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         dm.enqueue(request);
         Toast.makeText(getApplicationContext(), "Downloading File", //To notify the Client that the file is being downloaded
@@ -72,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
             //you have the permission now.
-            if(current_request != null) {
-                downloadFile(current_request);
+            if((current_request != null) && (current_fileName != null)) {
+                downloadFile(current_request, current_fileName);
             }
         }
     }
