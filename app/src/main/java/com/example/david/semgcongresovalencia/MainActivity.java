@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
         DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         dm.enqueue(request);
-        Toast.makeText(getApplicationContext(), "Downloading File", //To notify the Client that the file is being downloaded
+        Toast.makeText(getApplicationContext(), "Descargando archivo", //To notify the Client that the file is being downloaded
                 Toast.LENGTH_LONG).show();
     }
 
